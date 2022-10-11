@@ -10,6 +10,7 @@ function createElement(type, config, children) {
         ref = config.ref
         delete config.key
         delete config.ref
+
     }
 
     // 处理children
@@ -28,7 +29,7 @@ function createElement(type, config, children) {
         $$typeof:REACT_ELEMENT,
         key, //后面diff
         ref, //获取到真实dom
-        type,//类型 dev..
+        type,//类型 div..
         props
     }
 }
