@@ -23,6 +23,9 @@ function createDom(vdom) {
         if (type === REACT_TEXT) {
             dom = document.createTextNode(vdom.content)
         } else if (typeof type === 'function') {
+            if(type.isReactComponent){ // 类组件
+                return mountClassComponent(vdom)
+            }
             return mountFunctionComponent(vdom)
         } else {
             dom = document.createElement(type)
@@ -88,6 +91,14 @@ function mountFunctionComponent(vdom) {
     let {type, props} = vdom
     let functionVdom = type(props)
     return createDom(functionVdom)
+}
+
+// 处理类组件
+function mountClassComponent(vdom){
+    let {type,props} = vdom
+//    type是一个类
+    let classComponentVdom = new type(props).render()
+    return createDom(classComponentVdom)
 }
 
 const ReactDom = {

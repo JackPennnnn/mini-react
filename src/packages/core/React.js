@@ -1,6 +1,7 @@
 // jsx => babel
 import {REACT_ELEMENT} from "../constants";
 import { toObject } from "../utils";
+import Component from "./React.component";
 
 function createElement(type, config, children) {
     // 处理key ref
@@ -35,7 +36,8 @@ function createElement(type, config, children) {
 }
 
 const React = {
-    createElement
+    createElement,
+    Component
 }
 
 export default React

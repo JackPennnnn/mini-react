@@ -17,10 +17,19 @@ let element2 = React.createElement('h1',{
 // 3 jsx是一个父子结构（只有一个根）
 // 4 还有一个属性props
 
-function Test(props){
-    return <h1>
-        <div>Test 23 {props.name}</div>
-    </h1>
+// function Test(props){
+//     return <h1>
+//         <div>Test 23 {props.name}</div>
+//     </h1>
+// }
+class Test extends React.Component{
+    constructor(props) {
+        super(props);
+    }
+
+    render(){
+        return <h1><div>Test 23 {this.props.name}</div></h1>
+    }
 }
 
 // 把vNode => 真实dom 放到指定的位置
