@@ -1,7 +1,7 @@
 // 初始化react元素
 
 import {REACT_TEXT} from "../constants";
-
+import addEvent from './event'
 function render(vdom, container) {
     mount(vdom, container)
 }
@@ -18,20 +18,20 @@ function createDom(vdom) {
     let {type, props} = vdom
     let dom
 
-    if(type){
+    if (type) {
         // 1. 判断type => 文本或者元素
         if (type === REACT_TEXT) {
             dom = document.createTextNode(vdom.content)
         } else if (typeof type === 'function') {
-            if(type.isReactComponent){ // 类组件
+            if (type.isReactComponent) { // 类组件
                 return mountClassComponent(vdom)
             }
             return mountFunctionComponent(vdom)
         } else {
             dom = document.createElement(type)
         }
-    }else{
-    //    2. 没有就当成文本
+    } else {
+        //    2. 没有就当成文本
         dom = document.createTextNode(vdom)
     }
 
@@ -44,6 +44,7 @@ function createDom(vdom) {
         }
     }
 
+    vdom.dom = dom //保存真实dom
     return dom
 }
 
@@ -59,6 +60,10 @@ function updateProps(dom, oldProps, newProps) {
             for (let arr in styleObject) {
                 dom.style[arr] = styleObject[arr]
             }
+        } else if (key.startsWith('on')) {
+            // dom[key.toLocaleLowerCase()] = newProps[key]
+        //     以后不再把事件绑定在dom，而是通过事件委托，全部放到document上
+            addEvent(dom,key.toLocaleLowerCase(),newProps[key])
         } else { //其他属性
             dom[key] = newProps[key]
         }
@@ -94,11 +99,20 @@ function mountFunctionComponent(vdom) {
 }
 
 // 处理类组件
-function mountClassComponent(vdom){
-    let {type,props} = vdom
+function mountClassComponent(vdom) {
+    let {type, props} = vdom
 //    type是一个类
-    let classComponentVdom = new type(props).render()
-    return createDom(classComponentVdom)
+    let classComponentInstance = new type(props)
+    let classComponentVnode = classComponentInstance.render()
+    classComponentInstance.oldRenderVnode = classComponentVnode
+    return createDom(classComponentVnode)
+}
+
+export function toVnode(parentDom, oldVnode, newVnode) {
+    const newDom = createDom(newVnode)
+    const oldDom = oldVnode.dom
+//     更新
+    parentDom.replaceChild(newDom, oldDom)
 }
 
 const ReactDom = {

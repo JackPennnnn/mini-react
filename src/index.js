@@ -4,11 +4,11 @@ import ReactDOM from './packages/core/react-dom';
 // jsx
 // let element = <h1 style={{color:'red'}}>Hello World</h1>
 // babel => js方法 React.createElement() => vNode
-let element2 = React.createElement('h1',{
-    style:{
-        color:'red'
+let element2 = React.createElement('h1', {
+    style: {
+        color: 'red'
     }
-},'Hello World',React.createElement('span', {},66))
+}, 'Hello World', React.createElement('span', {}, 66))
 
 // 函数式组件？ 就是一个函数
 // 特点：
@@ -22,17 +22,32 @@ let element2 = React.createElement('h1',{
 //         <div>Test 23 {props.name}</div>
 //     </h1>
 // }
-class Test extends React.Component{
+class Test extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {num: 0}
     }
 
-    render(){
-        return <h1><div>Test 23 {this.props.name}</div></h1>
+    handleClick = (event) => {
+        console.log(event)
+        // 异步：事件的函数和React内部方法
+        // 同步：其他就是同步
+        this.setState({
+            num: this.state.num+1
+        })
+        this.setState({
+            num: this.state.num+1
+        })
+    }
+
+    render() {
+        return <h1>
+            <div>Test 23 {this.props.name} {this.state.num}</div>
+            <button onClick={this.handleClick} type={'button'}>123456</button>
+        </h1>
     }
 }
 
 // 把vNode => 真实dom 放到指定的位置
 ReactDOM.render(<Test name={'123456'}></Test>,
     document.getElementById('root'));
-
