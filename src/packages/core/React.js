@@ -1,5 +1,5 @@
 // jsx => babel
-import {REACT_ELEMENT} from "../constants";
+import {REACT_ELEMENT, REACT_FORWARD_REF} from "../constants";
 import { toObject } from "../utils";
 import Component from "./React.component";
 
@@ -35,9 +35,24 @@ function createElement(type, config, children) {
     }
 }
 
+function createRef(){
+    return {
+        current:null
+    }
+}
+
+function forwardRef(render){
+    return {
+        $$typeofs:REACT_FORWARD_REF,
+        render
+    }
+}
+
 const React = {
     createElement,
-    Component
+    Component,
+    createRef,
+    forwardRef
 }
 
 export default React

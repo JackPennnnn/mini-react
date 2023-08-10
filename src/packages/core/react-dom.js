@@ -1,7 +1,8 @@
 // 初始化react元素
 
-import {REACT_TEXT} from "../constants";
+import {REACT_FORWARD_REF, REACT_TEXT} from "../constants";
 import addEvent from './event'
+
 function render(vdom, container) {
     mount(vdom, container)
 }
@@ -15,13 +16,14 @@ function mount(vdom, container) {
 
 function createDom(vdom) {
     // vdom => 真实dom
-    let {type, props} = vdom
+    let {type, props, ref} = vdom
     let dom
-
     if (type) {
         // 1. 判断type => 文本或者元素
         if (type === REACT_TEXT) {
             dom = document.createTextNode(vdom.content)
+        } else if (type.$$typeofs === REACT_FORWARD_REF) {
+            return mountForWardRefComponent(vdom)
         } else if (typeof type === 'function') {
             if (type.isReactComponent) { // 类组件
                 return mountClassComponent(vdom)
@@ -45,6 +47,9 @@ function createDom(vdom) {
     }
 
     vdom.dom = dom //保存真实dom
+    if (ref) {
+        ref.current = dom
+    }
     return dom
 }
 
@@ -62,8 +67,8 @@ function updateProps(dom, oldProps, newProps) {
             }
         } else if (key.startsWith('on')) {
             // dom[key.toLocaleLowerCase()] = newProps[key]
-        //     以后不再把事件绑定在dom，而是通过事件委托，全部放到document上
-            addEvent(dom,key.toLocaleLowerCase(),newProps[key])
+            //     以后不再把事件绑定在dom，而是通过事件委托，全部放到document上
+            addEvent(dom, key.toLocaleLowerCase(), newProps[key])
         } else { //其他属性
             dom[key] = newProps[key]
         }
@@ -93,26 +98,50 @@ function changeChildren(children, dom) {
 
 // 处理函数式组件
 function mountFunctionComponent(vdom) {
+
     let {type, props} = vdom
     let functionVdom = type(props)
+    vdom.oldRenderVnode = functionVdom
     return createDom(functionVdom)
 }
 
 // 处理类组件
 function mountClassComponent(vdom) {
-    let {type, props} = vdom
+    let {type, props, ref} = vdom
 //    type是一个类
     let classComponentInstance = new type(props)
     let classComponentVnode = classComponentInstance.render()
+    if (ref) {
+        ref.current = classComponentInstance
+    }
     classComponentInstance.oldRenderVnode = classComponentVnode
+    vdom.oldRenderVnode = classComponentVnode
     return createDom(classComponentVnode)
+}
+
+//处理forWardRef组件
+function mountForWardRefComponent(vdom){
+    let {type, props,ref} = vdom
+    let refVnode = type.render(props,ref) //函数式组件
+    return createDom(refVnode)
 }
 
 export function toVnode(parentDom, oldVnode, newVnode) {
     const newDom = createDom(newVnode)
-    const oldDom = oldVnode.dom
+    const oldDom = findDOM(oldVnode)
 //     更新
     parentDom.replaceChild(newDom, oldDom)
+}
+
+//获取真实dom
+export function findDOM(vdom){
+    if(!vdom)return null
+    if(vdom.dom){
+        return vdom.dom
+    }else{ // 没有真实dom
+        return findDOM(vdom.oldRenderVnode)
+    }
+
 }
 
 const ReactDom = {

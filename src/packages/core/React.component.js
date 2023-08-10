@@ -1,4 +1,4 @@
-import {toVnode} from "./react-dom";
+import {toVnode,findDOM} from "./react-dom";
 
 export const updateQueue = {
     isBatchData:false, // 标识 是同步更新还是异步更新
@@ -88,8 +88,8 @@ class Component {
         //1新的vnode
         const newVnode = this.render()
         const oldVnode = this.oldRenderVnode // mountClassComponent里面有这个赋值
-        const parentDom = oldVnode.dom
-        toVnode(parentDom.parentNode,oldVnode,newVnode)
+        const oldDom = findDOM(oldVnode)
+        toVnode(oldDom.parentNode,oldVnode,newVnode)
         this.oldRenderVnode = newVnode
     }
 }
